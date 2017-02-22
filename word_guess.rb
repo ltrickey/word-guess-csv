@@ -1,17 +1,12 @@
+require 'csv'
+
 class WordGuess
   def initialize(debug = false)
     # are we in debug mode?
     @debug = debug
 
-    # possible words, selected at random
-    @words = {
-      "e" => %w(dog cat bug hat cap lit kin fan fin fun tan ten tin ton),
-      "m" => %w(plain claim brine crime alive bride skine drive slime stein jumpy),
-      "h" => %w(
-          machiavellian prestidigitation plenipotentiary quattuordecillion
-          magnanimous unencumbered bioluminescent circumlocution
-        )
-    }
+    #run method to access words from CSV file
+    get_word
 
     # players attempts allowed by difficulty
     @tries = {
@@ -23,7 +18,7 @@ class WordGuess
     # ask the user to set the game mode
     mode = set_mode
 
-    @word    = @words[mode].sample # chosen word; players try to guess this
+    @word    = @words[mode].sample.downcase # chosen word; players try to guess this
     @guesses = @tries[mode] # how many tries the player gets
     @user_word = "•" * @word.length # a "blank word" for user output
     @guessed = [] # keep track of letters that have been guessed
@@ -40,6 +35,25 @@ class WordGuess
     # start the first turn
     play_turn
   end
+
+  def get_word
+    #csv file with all the word options
+    word_file = CSV.open("words.csv")
+
+    #iterate through and create hash w/ easy, med, hard words
+    @words = { "e" => [], "m" => [], "h" => []}
+    word_file.each do |line|
+      if line[0] == "e"
+        @words["e"] = line
+      elsif line[0] == "m"
+        @words["m"] = line
+      elsif line [0] == "h"
+        @words["h"] = line
+      end
+    end
+
+  end
+
 
   def play_turn
     # a turn begins by asking a player for their guess
@@ -129,6 +143,7 @@ class WordGuess
 
     letter
   end
+
 end
 
 WordGuess.new
